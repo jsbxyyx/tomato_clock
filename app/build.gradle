@@ -5,7 +5,7 @@ android {
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "io.xxzkid.tomato_clock"
-        minSdkVersion 28
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"

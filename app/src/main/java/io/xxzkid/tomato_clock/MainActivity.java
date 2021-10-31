@@ -2,8 +2,10 @@ package io.xxzkid.tomato_clock;
 
 import android.app.Activity;
 import android.content.Context;
-import android.media.Ringtone;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.TextUtils;
@@ -21,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     private CountDownTimer countDownTimer;
 
-    private Ringtone ringtone;
+    private MediaPlayer mMediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
         keepScreenLongLight(this, true);
 
-        ringtone = RingtoneManager.getRingtone(context,
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
+        mpInit();
 
         final EditText etTime = findViewById(R.id.et_time);
 
@@ -61,7 +62,8 @@ public class MainActivity extends AppCompatActivity {
                         long s = millisUntilFinished / 1000;
                         String min = s / 60 + "";
                         String sec = s % 60 + "";
-                        tvCountTime.setText((min.length() == 1 ? "0" + min : min) +
+                        tvCountTime.setText(
+                                (min.length() == 1 ? "0" + min : min) +
                                 ":" +
                                 (sec.length() == 1 ? "0" + sec : sec));
                     }
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                         start.setEnabled(true);
                         etTime.setEnabled(true);
                         clearCountDownTimer();
-                        ringtonePlay();
+                        mpPlay();
                     }
                 };
                 countDownTimer.start();
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 etTime.setEnabled(true);
                 etTime.setText("");
                 tvCountTime.setText("00:00");
-                ringtoneStop();
+                mpStop();
             }
         });
 
@@ -117,16 +119,30 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void ringtonePlay() {
-        if (ringtone != null) {
-            ringtone.setLooping(true);
-            ringtone.play();
+    private void mpInit() {
+        try {
+            Uri alert =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setDataSource(this, alert);
+            final AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (audioManager.getStreamVolume(AudioManager.STREAM_RING) != 0) {
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_RING);
+                mMediaPlayer.setLooping(true);
+                mMediaPlayer.prepare();
+            }
+        } catch(Exception e) {
         }
     }
 
-    private void ringtoneStop() {
-        if (ringtone != null) {
-            ringtone.stop();
+    private void mpPlay() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.start();
+        }
+    }
+
+    private void mpStop() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.stop();
         }
     }
 
